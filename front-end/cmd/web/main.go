@@ -9,7 +9,7 @@ import (
 
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		render(w, "test.page.gohtml")
+		render(w, "./templates/test.page.gohtml")
 	})
 
 	// need to be 80 on production!!!!
@@ -23,17 +23,11 @@ func main() {
 
 func render(w http.ResponseWriter, t string) {
 
-	partials := []string{
-		"./cmd/web/templates/base.layout.gohtml",
-		"./cmd/web/templates/header.partial.gohtml",
-		"./cmd/web/templates/footer.partial.gohtml",
-	}
-
-	var templateSlice []string
-	templateSlice = append(templateSlice, fmt.Sprintf("./cmd/web/templates/%s", t))
-
-	for _, x := range partials {
-		templateSlice = append(templateSlice, x)
+	templateSlice := []string{
+		t,
+		"./templates/base.layout.gohtml",
+		"./templates/header.partial.gohtml",
+		"./templates/footer.partial.gohtml",
 	}
 
 	tmpl, err := template.ParseFiles(templateSlice...)

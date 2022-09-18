@@ -3,25 +3,29 @@ package main
 import (
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/cors"
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 )
 
-func (app *Config) routes() http.Handler {
-	mux := chi.NewRouter()
-	mux.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"https://*", "http://*"},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-		ExposedHeaders:   []string{"Link"},
+func (app *Config) routes() *gin.Engine {
+	mux := gin.New()
+	mux.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"https://*", "http://*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposeHeaders:    []string{"Link"},
 		AllowCredentials: true,
 		MaxAge:           300,
+		AllowWildcard:    true,
 	}))
 
-	mux.Use(middleware.Heartbeat("/ping"))
-
-	mux.Post("/", app.Broker)
+	mux.GET("/ping", heartBeat)
+	mux.HEAD("/ping", heartBeat)
+	mux.POST("/", app.Broker)
 
 	return mux
+}
+
+func heartBeat(ctx *gin.Context) {
+	ctx.JSON(http.StatusOK, gin.H{})
 }
